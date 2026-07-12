@@ -50,18 +50,21 @@ A 5-agent sequential CrewAI workflow generates 15,000–25,000 tokens per run. O
 
 ## 🚀 100% Free Deploy to Render
 
-Click the button above to deploy the full stack completely for free. 
 The repository uses a multi-stage Dockerfile to build the React frontend and serve it directly from the FastAPI backend, utilizing an ephemeral SQLite database to keep costs at zero.
 
 1. Fork this repository to your GitHub account
-2. Go to [render.com](https://render.com) → **New → Blueprint**
-3. Connect your fork — Render reads `render.yaml` automatically and creates a **Single Free Web Service**.
-4. Set the required environment variable:
+2. Go to [render.com](https://render.com) dashboard and click **New → Web Service**
+3. Select **"Build and deploy from a Git repository"** and connect your fork
+4. Render will automatically detect the `Dockerfile`. Use the following settings:
+   - **Environment**: Docker
+   - **Plan**: Free
+5. Expand **Advanced** and add the required Environment Variable:
    - `FIREWORKS_API_KEY` → Your Fireworks AI key (get one at [fireworks.ai](https://fireworks.ai))
+6. Click **Create Web Service**
 
 > **Note on Free Tier:** Render spins down free web services after 15 minutes of inactivity. When it wakes up, the ephemeral SQLite database is wiped. This is actually ideal for a hackathon demo, as it automatically clears old test data!
 
-> **Demo Mode:** If you don't have an API key, set `DEMO_MODE=true` in the Render dashboard. This bypasses all external AI calls and streams a beautiful pre-recorded advisory instantly.
+> **Demo Mode:** If you don't have an API key, add an environment variable `DEMO_MODE=true` in the Render dashboard. This bypasses all external AI calls and streams a beautiful pre-recorded advisory instantly.
 
 ---
 
@@ -133,7 +136,6 @@ This streams a pre-recorded, beautiful Hindi advisory via WebSocket — zero ext
 
 ```
 Kisaan-Flow.AI/
-├── render.yaml                 # Free Single-Service Render blueprint
 ├── Dockerfile                  # Multi-stage root build (Frontend + Backend)
 ├── docker-compose.yml          # Local infrastructure
 ├── .gitignore
