@@ -17,7 +17,8 @@ class Settings(BaseSettings):
     VERSION: str = "0.1.0"
 
     # ── Database ─────────────────────────────────────────────────────
-    DATABASE_URL: str = "postgresql://postgres:password@localhost:5432/neuroflow"
+    # Use SQLite by default for easy, free, zero-config deployment
+    DATABASE_URL: str = "sqlite:///./kisanflow.db"
 
     # ── Qdrant Vector DB ─────────────────────────────────────────────
     QDRANT_HOST: str = "localhost"

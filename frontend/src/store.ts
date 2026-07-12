@@ -20,13 +20,12 @@ interface AppState {
 }
 
 // ── API URL Resolution ────────────────────────────────────────────────
-// In production (Render): VITE_API_URL is set to the backend service URL
-// In development: falls back to localhost:8000
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
-
-// WebSocket protocol: wss:// for https, ws:// for http
-const WS_BASE = API_BASE.replace(/^https/, 'wss').replace(/^http/, 'ws');
-
+// In a single-service deployment, the frontend is served by the backend.
+// We can use relative paths which naturally inherit the correct origin.
+const API_BASE = '';
+// For WebSockets, we construct the URL based on the current window location.
+const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const WS_BASE = `${protocol}//${window.location.host}`;
 // ─────────────────────────────────────────────────────────────────────
 
 export const useAppStore = create<AppState>((set, get) => ({

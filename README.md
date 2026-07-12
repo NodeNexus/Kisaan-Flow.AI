@@ -42,24 +42,26 @@ A 5-agent sequential CrewAI workflow generates 15,000–25,000 tokens per run. O
 | **Backend** | FastAPI, Python 3.11 |
 | **Frontend** | React 19, Vite, Tailwind CSS, Framer Motion |
 | **State Management** | Zustand |
-| **Database** | PostgreSQL (SQLModel) |
-| **Vector Memory** | Qdrant |
-| **Deployment** | Render.com (render.yaml IaC) |
+| **Database** | SQLite (SQLModel) |
+| **Vector Memory** | Qdrant (Optional / Demo Mode uses zero DBs) |
+| **Deployment** | Render.com (100% Free Single Web Service) |
 
 ---
 
-## 🚀 One-Click Deploy to Render
+## 🚀 100% Free Deploy to Render
 
-Click the button above, or:
+Click the button above to deploy the full stack completely for free. 
+The repository uses a multi-stage Dockerfile to build the React frontend and serve it directly from the FastAPI backend, utilizing an ephemeral SQLite database to keep costs at zero.
 
 1. Fork this repository to your GitHub account
 2. Go to [render.com](https://render.com) → **New → Blueprint**
-3. Connect your fork — Render reads `render.yaml` automatically
+3. Connect your fork — Render reads `render.yaml` automatically and creates a **Single Free Web Service**.
 4. Set the required environment variable:
    - `FIREWORKS_API_KEY` → Your Fireworks AI key (get one at [fireworks.ai](https://fireworks.ai))
-5. After deployment, set `VITE_API_URL` in the **frontend static site** environment to your backend URL (e.g. `https://kisanflow-api.onrender.com`)
 
-> **Note:** Qdrant is not provisioned by Render's free tier. For demos, set `DEMO_MODE=true` on the backend service to bypass all external API calls and stream a pre-recorded advisory.
+> **Note on Free Tier:** Render spins down free web services after 15 minutes of inactivity. When it wakes up, the ephemeral SQLite database is wiped. This is actually ideal for a hackathon demo, as it automatically clears old test data!
+
+> **Demo Mode:** If you don't have an API key, set `DEMO_MODE=true` in the Render dashboard. This bypasses all external AI calls and streams a beautiful pre-recorded advisory instantly.
 
 ---
 
@@ -131,35 +133,33 @@ This streams a pre-recorded, beautiful Hindi advisory via WebSocket — zero ext
 
 ```
 Kisaan-Flow.AI/
-├── render.yaml                 # Render.com IaC blueprint
+├── render.yaml                 # Free Single-Service Render blueprint
+├── Dockerfile                  # Multi-stage root build (Frontend + Backend)
 ├── docker-compose.yml          # Local infrastructure
 ├── .gitignore
 │
 ├── backend/
-│   ├── Dockerfile
 │   ├── requirements.txt
 │   ├── .env.example
-│   ├── main.py                 # FastAPI app + WebSocket manager
+│   ├── main.py                 # FastAPI app + WebSocket + Static Files
 │   ├── agents/
 │   │   ├── core_agents.py      # 5 CrewAI agent definitions
 │   │   └── tasks.py            # Agent task definitions
 │   ├── core/
-│   │   ├── config.py           # Pydantic settings
+│   │   ├── config.py           # Pydantic settings (SQLite default)
 │   │   └── workflow.py         # CrewAI crew orchestration
 │   ├── database/
 │   │   ├── models.py           # SQLModel ORM models
-│   │   ├── sql_db.py           # PostgreSQL connection
-│   │   └── vector_db.py        # Qdrant client
+│   │   ├── sql_db.py           # SQLite connection
+│   │   └── vector_db.py        # Qdrant client (Optional)
 │   └── tools/
 │       └── cached_search.py    # Demo-safe DuckDuckGo wrapper
 │
 └── frontend/
-    ├── Dockerfile
-    ├── nginx.conf              # SPA routing + gzip + caching
     ├── src/
     │   ├── App.tsx             # Landing page
     │   ├── Dashboard.tsx       # AI workflow UI
-    │   ├── store.ts            # Zustand state (WebSocket)
+    │   ├── store.ts            # Zustand state (Relative Paths)
     │   └── index.css           # Premium CSS design system
     └── index.html
 ```

@@ -1,5 +1,7 @@
 from fastapi import FastAPI, BackgroundTasks, WebSocket, WebSocketDisconnect, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from sqlmodel import Session, select
 from typing import List, Dict
@@ -101,6 +103,16 @@ app.add_middleware(
 class HealthResponse(BaseModel):
     status: str
     message: str
+
+# ── Static Files (Frontend) ────────────────────────────────────────────────
+# Mount the React frontend if the directory exists
+STATIC_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
+if os.path.isdir(STATIC_DIR):
+    # Mount assets directory specifically so we can handle the index.html fallback
+    app.mount("/assets", StaticFiles(directory=os.path.join(STATIC_DIR, "assets")), name="assets")
+    app.mount("/vite.svg", StaticFiles(directory=STATIC_DIR), name="vite_svg")
+    # You can add other static files here as needed
+
 
 class WorkflowRequest(BaseModel):
     prompt: str
@@ -215,3 +227,16 @@ async def websocket_endpoint(websocket: WebSocket, workflow_id: str):
             # Can handle incoming WS messages if needed
     except WebSocketDisconnect:
         manager.disconnect(websocket, workflow_id)
+
+# ── SPA Catch-All Route ──────────────────────────────────────────────────
+@app.get("/{full_path:path}")
+async def serve_spa(full_path: str):
+    """
+    Catch-all route to serve the React SPA index.html for any unrecognized path.
+    This allows client-side routing to work seamlessly.
+    """
+    index_path = os.path.join(STATIC_DIR, "index.html")
+    if os.path.isfile(index_path):
+        return FileResponse(index_path)
+    return {"error": "Frontend not built or static files missing."}
+
