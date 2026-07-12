@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+sqlmodel
+psycopg2-binary
+crewai
+langchain-community
+duckduckgo-search
+pydantic-settings
+qdrant-client

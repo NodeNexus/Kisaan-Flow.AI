@@ -1,0 +1,65 @@
+# ============================================================
+# KisanFlow AI — Render.com Infrastructure Blueprint
+# Deploy the full stack with one click:
+#   - Backend: Python FastAPI (Web Service)
+#   - Frontend: React/Vite (Static Site)
+#   - PostgreSQL: Managed Database
+# ============================================================
+
+services:
+  # ── Backend API ──────────────────────────────────────────
+  - type: web
+    name: kisanflow-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    region: oregon
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: FIREWORKS_API_KEY
+        sync: false           # Set manually in Render dashboard
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kisanflow-db
+          property: connectionString
+      - key: QDRANT_HOST
+        value: kisanflow-qdrant  # Use Render internal hostname if self-hosting, or a managed Qdrant Cloud URL
+      - key: QDRANT_PORT
+        value: 6333
+      - key: DEMO_MODE
+        value: false           # Set to true for live demos
+      - key: PYTHONPATH
+        value: /app
+      - key: PORT
+        value: 8000
+
+  # ── Frontend Static Site ──────────────────────────────────
+  - type: web
+    name: kisanflow-frontend
+    runtime: static
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: ./frontend/dist
+    pullRequestPreviewsEnabled: true
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+# ── PostgreSQL Database ───────────────────────────────────
+databases:
+  - name: kisanflow-db
+    databaseName: kisanflow
+    user: kisanflow_user
+    plan: free
+    region: oregon
