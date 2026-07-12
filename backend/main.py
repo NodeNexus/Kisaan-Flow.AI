@@ -86,7 +86,11 @@ manager = ConnectionManager()
 @app.on_event("startup")
 def on_startup():
     init_db()
-    init_vector_db()
+    try:
+        init_vector_db()
+        print("Vector database initialized successfully.")
+    except Exception as e:
+        print(f"Skipping vector database initialization (Qdrant not available): {e}")
 
 # Enable CORS for frontend integration
 # In production: set ALLOWED_ORIGINS to your Render frontend URL in the dashboard
